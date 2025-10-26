@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const bodyParser = require("body-parser");
@@ -63,5 +64,6 @@ app.get("/users", (req, res) => {
 app.get("/", (req, res) => {
   res.send("서버 연결 성공!");
 });
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
