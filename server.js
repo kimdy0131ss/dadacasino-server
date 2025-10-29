@@ -32,6 +32,18 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
   password TEXT
 )`);
 
+db.run(`ALTER TABLE users ADD COLUMN cash INTEGER DEFAULT 0`, err => {
+  if (err) {
+    if (err.message.includes("duplicate column name")) {
+      console.log("이미 cash 컬럼이 존재합니다.");
+    } else {
+      console.error("컬럼 추가 중 오류:", err.message);
+    }
+  } else {
+    console.log("cash 컬럼이 성공적으로 추가되었습니다.");
+  }
+});
+
 app.post("/signin", (req, res) => {
   const { username, userbirth, userid, password } = req.body;
   db.run(`INSERT INTO users (username, userbirth, userid, password) VALUES (?, ?, ?, ?)`, [username, userbirth, userid, password],
@@ -67,3 +79,4 @@ app.get("/", (req, res) => {
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
