@@ -32,17 +32,6 @@ app.use(session({
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-function authMiddleware(req, res, next) {
-    if (!req.session.userid) {
-        return res.status(403).send("로그인이 필요한 서비스입니다.");
-    }
-    next();
-}
-
-app.get("/cash", authMiddleware, (req, res) => {
-    res.sendFile(path.join(__dirname, "cash.html"));
-});
-
 db.run(`CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT,
@@ -96,7 +85,14 @@ app.get("/", (req, res) => {
   res.send("서버 연결 성공!");
 });
 
+app.get("/login-check", (req, res) => {
+    if (!req.session.userid) {
+        return res.status(403).send(0);
+    }
+    res.send(1);
+});
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
