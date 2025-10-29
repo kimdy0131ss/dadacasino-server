@@ -92,7 +92,8 @@ app.get("/login-check", (req, res) => {
     res.send(1);
 });
 
+app.get("/ping", (req, res) => {
+  res.send("pong");
+});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-
