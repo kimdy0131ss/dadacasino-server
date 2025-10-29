@@ -2,10 +2,12 @@ const path = require("path");
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const bodyParser = require("body-parser");
+const session = require("express-session");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const db = new sqlite3.Database("users.db");
+
 app.use(bodyParser.urlencoded({ extended: true })); // form submit용
 app.use(bodyParser.json()); // JSON용
 
@@ -21,8 +23,25 @@ app.use((req, res, next) => {
     }
 });
 
+app.use(session({
+    secret: "secret-code",
+    resave: false,
+    saveUninitialized: true
+}));
+
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
+
+function authMiddleware(req, res, next) {
+    if (!req.session.userid) {
+        return res.status(403).send("로그인이 필요한 서비스입니다.");
+    }
+    next();
+}
+
+app.get("/cash", authMiddleware, (req, res) => {
+    res.sendFile(path.join(__dirname, "cash.html"));
+});
 
 db.run(`CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,7 +73,6 @@ app.post("/signin", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log("testing");
   const { userid, password } = req.body;
 
   db.get("SELECT * FROM users WHERE userid = ?", [userid], (err, user) => {
@@ -62,6 +80,7 @@ app.post("/login", (req, res) => {
     if (!user) return res.status(404).send("존재하지 않는 아이디입니다");
     if (user.password !== password) return res.status(401).send("비밀번호가 틀렸습니다");
 
+    req.session.userid = userid;
     res.send("로그인 성공!");
   });
 });
@@ -79,4 +98,5 @@ app.get("/", (req, res) => {
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
